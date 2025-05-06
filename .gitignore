@@ -1,0 +1,5 @@
+.vscode
+__pacache__
+auth_data
+settings.json
+.env
