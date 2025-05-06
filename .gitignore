@@ -3,3 +3,5 @@ __pacache__
 auth_data
 settings.json
 .env
+raids_glenn.csv
+raids_koma.csv

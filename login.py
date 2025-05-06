@@ -6,13 +6,14 @@ from playwright.async_api import (
 )
 import os
 from dotenv import load_dotenv
+from getpass import getpass
 
 
 async def run():
     load_dotenv()
 
-    email = os.getenv("KANO_EMAIL")
-    password = os.getenv("KANO_PASSWORD")
+    email = os.getenv("KANO_EMAIL") or input("Email: ")
+    password = os.getenv("KANO_PASSWORD") or getpass("Password: ")
 
     async with async_playwright() as p:
         context = await p.chromium.launch_persistent_context(
