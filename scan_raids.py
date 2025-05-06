@@ -8,7 +8,6 @@ import os
 from dotenv import load_dotenv
 import pandas as pd
 import utils as u
-from numpy import nan
 
 glenn = {"csv": "raids_glenn.csv"}
 koma = {"csv": "raids_koma.csv"}
