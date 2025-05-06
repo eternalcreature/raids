@@ -1,7 +1,7 @@
-.vscode
-__pacache__
-auth_data
-settings.json
-.env
-raids_glenn.csv
-raids_koma.csv
+.vscode/
+__pacache__/
+auth_data/
+/settings.json
+/.env
+/raids_glenn.csv
+/raids_koma.csv
