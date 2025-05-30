@@ -9,13 +9,13 @@ from dotenv import load_dotenv
 import pandas as pd
 import utils as u
 
-glenn = {"csv": "raids_glenn.csv", "links": "links_glenn.txt"}
-koma = {"csv": "raids_koma.csv", "links": "links_koma.txt"}
-lia = {"csv": "raids.csv", "links":"links.txt"}
+files = {"csv": "raids.csv", "links": "links.txt"}
 
-files = lia
 
-cat_order = pd.CategoricalDtype(categories=['Open', 'Dead', 'Defeat', 'Unknown'], ordered=True)
+cat_order = pd.CategoricalDtype(
+    categories=["Open", "Dead", "Defeat", "Unknown"], ordered=True
+)
+
 
 async def run():
 
@@ -41,14 +41,16 @@ async def run():
                 }
                 df = df._append(new_row, ignore_index=True)
 
-        # leave out only the ongoing or unchecked raids for further processing 
+        # leave out only the ongoing or unchecked raids for further processing
         df2 = df[(df.status != "Dead") & (df.status != "Defeat")]
-        
+
         context = await p.chromium.launch_persistent_context(
             user_data_dir="auth_data",  # directory where cookies/storage will be saved
             headless=False,
         )
+
         page = await context.new_page()
+        url = "https://www.kanoplay.com/la_cosa_nostra/?game_server=server_2"
 
         for index, row in df2.iterrows():
             await page.goto(row["link"])
@@ -131,22 +133,41 @@ async def run():
         # Step 3: Select the necessary columns, removing the suffixes
         merged = merged[df.columns]
         merged = merged.sort_values(by=['status', 'HPperspot'], ascending=[True, True])
+        print(merged["spots"])
         merged["spots"].astype("Int64")
         merged.to_csv(files["csv"], index=False)
-        
+
         df2 = merged[merged["status"]=="Open"]
         df2=df2.sort_values(by="time", ascending=False)
+
+        messages_to_post=[]
+        messages_to_post.append("**************")
+        messages_to_post.append("Everything above is dead, full or reposted below")
         for index, row in df2.iterrows():
-            with open("updates.txt", "a", encoding="utf-8") as f:
-                text = f"{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
-                if row["HPperspot"]<1e7:
-                    text = f"[⭐]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
-                if row["time"]<7200:
-                    text = f"[⚠️]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"    
-                if row["time"]<7200 and row["HPperspot"]<1e7:
-                    text = f"[⚠️⭐]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
-                f.write(text+"\n")
-        await context.close()
+            text = f"{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+            if row["HPperspot"]<1e7:
+                text = f"[⭐]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+            if row["time"]<7200:
+                text = f"[⚠️]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+            if row["time"]<7200 and row["HPperspot"]<1e7:
+                text = f"[⚠️⭐]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+            messages_to_post.append(text)
+        messages_to_post.append("When joining a raid, do 15-20M damage minimum unless the health is already low")
+        messages_to_post.append("If the leader has done 50M damage, don't surpass their actions")
+        messages_to_post.append("If you see some1 is already attacking the boss, step back and wait until they're done")
+        page = await context.new_page()
+        url = "https://www.kanoplay.com/la_cosa_nostra/?game_server=server_2"
+        await page.goto(url)  # <-- ✅ NEED to await this
+        await page.wait_for_timeout(5000)  # Give it time to fully load iframe
+        iframe = page.frame_locator("#portal_canvas_iframe")
+        for msg in messages_to_post:
+            try:
+                await iframe.locator("#chat_input").wait_for(timeout=5000)
+                await iframe.locator("#chat_input").fill(msg)
+                await iframe.locator("div.chat-button").click()
+                await asyncio.sleep(1)
+            except Exception as e:
+                print(f"Failed to send message: {msg}\nError: {e}")
 
 
 asyncio.run(run())

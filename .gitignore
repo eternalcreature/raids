@@ -1,7 +1,5 @@
 .vscode/
-__pacache__/
+__pycache__/
 auth_data/
 /settings.json
 /.env
-/raids_glenn.csv
-/raids_koma.csv
