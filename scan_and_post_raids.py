@@ -141,20 +141,16 @@ async def run():
         df2=df2.sort_values(by="time", ascending=False)
 
         messages_to_post=[]
-        messages_to_post.append("**************")
-        messages_to_post.append("Everything above is dead, full or reposted below")
+        messages_to_post.append("everything above is dead, full or reposted below")
         for index, row in df2.iterrows():
             text = f"{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
             if row["HPperspot"]<1e7:
-                text = f"[⭐]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
-            if row["time"]<7200:
-                text = f"[⚠️]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
-            if row["time"]<7200 and row["HPperspot"]<1e7:
-                text = f"[⚠️⭐]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+                text = f"[⭐] {row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+            if row["time"]<10800:
+                text = f"[⚠️] {row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+            if row["time"]<10800 and row["HPperspot"]<1e7:
+                text = f"[⚠️⭐] {row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
             messages_to_post.append(text)
-        messages_to_post.append("When joining a raid, do 15-20M damage minimum unless the health is already low")
-        messages_to_post.append("If the leader has done 50M damage, don't surpass their actions")
-        messages_to_post.append("If you see some1 is already attacking the boss, step back and wait until they're done")
         page = await context.new_page()
         url = "https://www.kanoplay.com/la_cosa_nostra/?game_server=server_2"
         await page.goto(url)  # <-- ✅ NEED to await this
@@ -165,7 +161,7 @@ async def run():
                 await iframe.locator("#chat_input").wait_for(timeout=5000)
                 await iframe.locator("#chat_input").fill(msg)
                 await iframe.locator("div.chat-button").click()
-                await asyncio.sleep(1)
+                await asyncio.sleep(1.5)
             except Exception as e:
                 print(f"Failed to send message: {msg}\nError: {e}")
 

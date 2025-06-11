@@ -140,11 +140,11 @@ async def run():
             with open("updates.txt", "a", encoding="utf-8") as f:
                 text = f"{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
                 if row["HPperspot"]<1e7:
-                    text = f"[⭐]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+                    text = f"[⭐] {row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
                 if row["time"]<7200:
-                    text = f"[⚠️]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"    
+                    text = f"[⚠️] {row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"    
                 if row["time"]<7200 and row["HPperspot"]<1e7:
-                    text = f"[⚠️⭐]{row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
+                    text = f"[⚠️⭐] {row["link"]} • {row["spots"]} slots • {row["HPperspot"]/1000000:.1f}M each • {row["time"]/3600:.1f} hours left"
                 f.write(text+"\n")
         await context.close()
 
